@@ -19,6 +19,14 @@ async function getProductById(id) {
     return rows[0] || null;
 }
 
+async function getProductsByCategory(categoryId) {
+    const [rows] = await pool.execute(
+        'SELECT * FROM product WHERE category_id = ?',
+        [categoryId]
+    );
+    return rows;
+}
+
 async function updateProduct(id, productData) {
     const { name, price, category_id, unit } = productData;
     const sql = `UPDATE product SET name = ?, price = ?, category_id = ?, unit = ? WHERE id = ?`;
@@ -38,4 +46,5 @@ module.exports = {
     getProductById,
     updateProduct,
     deleteProduct,
+    getProductsByCategory,
 };

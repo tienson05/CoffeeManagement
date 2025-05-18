@@ -1,9 +1,25 @@
 const categoryService = require('../services/category.service');
-
+const productService = require('../services/product.service')
 exports.getAllCategories = async (req, res) => {
-    const categories = await categoryService.getAllCategories();
-    res.json(categories);
+    try {
+        const categories = await categoryService.getAllCategories();
+
+        // Duyệt từng category để lấy products theo từng categoryId
+        const results = await Promise.all(categories.map(async (category) => {
+            const products = await productService.getProductsByCategory(category.id);
+            return {
+                ...category,
+                products: products,
+            };
+        }));
+
+        res.json(results);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Lỗi khi lấy danh mục và sản phẩm' });
+    }
 };
+
 
 exports.getCategoryById = async (req, res) => {
     const { id } = req.params;

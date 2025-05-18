@@ -2,8 +2,9 @@ const userService = require('../services/user.service');
 
 exports.login = async (req, res) => {
     try {
-        const { username, password } = req.body;  // Lấy từ body
-
+        const { email, password } = req.body;  // Lấy từ body
+        const username = email;
+        console.log(username + " " + password)
         // Lấy user theo username
         const user = await userService.getUserByUsername(username);
         if (!user) {
