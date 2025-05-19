@@ -18,9 +18,9 @@ async function getBillById(id) {
 async function getOrderItemsByBillId(invoiceId) {
     const sql = `
         SELECT oi.*, p.name AS product_name
-        FROM orderitem oi
+        FROM order_item oi
         JOIN product p ON oi.product_id = p.id
-        WHERE oi.invoice_id = ?
+        WHERE oi.bill_id = ?
     `;
     const [rows] = await pool.execute(sql, [invoiceId]);
     return rows;
@@ -28,28 +28,32 @@ async function getOrderItemsByBillId(invoiceId) {
 
 // Tạo hóa đơn mới cùng với các sản phẩm
 async function createBill(billData) {
-    const { phoneNumberCus, totalPrice, created_at, createdByEmployID, items } = billData;
+    const created_at = new Date(); // Dùng dạng Date object (MySQL tự convert)
+
+    const { total_price, created_by, items } = billData;
 
     const conn = await pool.getConnection();
     try {
         await conn.beginTransaction();
 
         const insertBillSQL = `
-            INSERT INTO bill (phoneNumberCus, totalPrice, created_at, createdByEmployID)
-            VALUES (?, ?, ?, ?)
+            INSERT INTO bill (total_price, created_at, created_by)
+            VALUES (?, ?, ?)
         `;
-        const [billResult] = await conn.execute(insertBillSQL, [
-            phoneNumberCus, totalPrice, created_at, createdByEmployID
-        ]);
+        const [billResult] = await conn.execute(insertBillSQL, [total_price, created_at, created_by]);
 
         const billId = billResult.insertId;
+        console.log(billId)
 
         const insertItemSQL = `
-            INSERT INTO orderitem (invoice_id, product_id, quantity, price)
+            INSERT INTO order_item (bill_id, product_id, quantity, price)
             VALUES (?, ?, ?, ?)
         `;
         for (const item of items) {
-            const { product_id, quantity, price } = item;
+            const product_id = item.product_id;
+            const quantity = item.quantity;
+            const price = parseFloat(item.price); // đảm bảo là số
+
             await conn.execute(insertItemSQL, [billId, product_id, quantity, price]);
         }
 
@@ -62,6 +66,7 @@ async function createBill(billData) {
         conn.release();
     }
 }
+
 
 module.exports = {
     getAllBills,

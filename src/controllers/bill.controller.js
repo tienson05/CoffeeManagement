@@ -1,25 +1,13 @@
 const billService = require('../services/bill.service');
 const userService = require('../services/user.service')
-//Mẫu JSON gửi khi tạo bill
-// {
-//   "phoneNumberCus": "0123456789",
-//   "totalPrice": 250000,
-//   "created_at": "2025-05-16T10:30:00",
-//   "createdByEmployID": 2,
-//   "items": [
-//     { "product_id": 1, "quantity": 2, "price": 50000 },
-//     { "product_id": 3, "quantity": 3, "price": 50000 }
-//   ]
-// }
 
 exports.getAllBills = async (req, res) => {
     try {
         const bills = await billService.getAllBills();
 
-        // Giả sử bạn có userService.getUserById(id)
         const billsWithUser = await Promise.all(
             bills.map(async (bill) => {
-                const user = await userService.getUserById(bill.createdByEmployID);
+                const user = await userService.getUserById(bill.created_by);
                 return {
                     ...bill,
                     user,
@@ -41,7 +29,7 @@ exports.getBillById = async (req, res) => {
 
     const items = await billService.getOrderItemsByBillId(id);
 
-    const employee = await userService.getUserById(bill.createdByEmployID);
+    const employee = await userService.getUserById(bill.created_by);
     if (!employee) return res.status(404).json({ message: 'Employee not found' });
     // Trả về object kết hợp bill, items, và thông tin nhân viên
     res.json({

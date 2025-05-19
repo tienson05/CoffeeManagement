@@ -1,9 +1,9 @@
 const pool = require('../config/db');
 
 async function createProduct(productData) {
-    const { name, price, category_id, unit } = productData;
-    const sql = `INSERT INTO product (name, price, category_id, unit) VALUES (?, ?, ?, ?)`;
-    const [result] = await pool.execute(sql, [name, price, category_id, unit]);
+    const { name, unit, price, category_id, description, image_url } = productData;
+    const sql = `INSERT INTO product (name, price, category_id, unit, description, image_url) VALUES (?, ?, ?, ?, ?, ?)`;
+    const [result] = await pool.execute(sql, [name, price, category_id, unit, description, image_url]);
     return { id: result.insertId, ...productData };
 }
 
@@ -28,9 +28,10 @@ async function getProductsByCategory(categoryId) {
 }
 
 async function updateProduct(id, productData) {
-    const { name, price, category_id, unit } = productData;
-    const sql = `UPDATE product SET name = ?, price = ?, category_id = ?, unit = ? WHERE id = ?`;
-    const [result] = await pool.execute(sql, [name, price, category_id, unit, id]);
+    console.log(id, productData)
+    const { name, price, image_url } = productData;
+    const sql = `UPDATE product SET name = ?, price = ?, image_url = ? WHERE id = ?`;
+    const [result] = await pool.execute(sql, [name, price, image_url, id]);
     return result.affectedRows > 0;
 }
 

@@ -6,7 +6,7 @@ const pool = require('../config/db');
 
 // Lấy tất cả người dùng
 async function getAllUsers() {
-    const sql = 'SELECT * FROM user';
+    const sql = 'SELECT * FROM user WHERE role_id != 1';
     const [rows] = await pool.query(sql);
     return rows;
 }
@@ -45,7 +45,7 @@ async function updateUser(id, userData) {
 
 // Xóa người dùng
 async function deleteUser(id) {
-    const sql = 'DELETE FROM user WHERE id = ?';
+    const sql = 'UPDATE user SET status = "inactive" WHERE id = ?';
     const [result] = await pool.execute(sql, [id]);
     return result.affectedRows > 0;
 }
